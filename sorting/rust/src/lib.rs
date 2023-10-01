@@ -1,4 +1,3 @@
-//TODO: Make it generic
 pub fn find_first_not_smaller(items: &Vec<isize>, target: isize) -> Option<usize> {
     let mut left: isize = 0;
     let mut right: isize = items.len() as isize - 1 ;
