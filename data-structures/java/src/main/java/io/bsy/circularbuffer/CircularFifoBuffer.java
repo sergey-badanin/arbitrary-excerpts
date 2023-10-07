@@ -1,4 +1,4 @@
-package io.bsy;
+package io.bsy.circularbuffer;
 
 import java.lang.reflect.Array;
 

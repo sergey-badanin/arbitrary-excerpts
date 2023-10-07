@@ -1,4 +1,4 @@
-package io.bsy;
+package io.bsy.circularbuffer;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
