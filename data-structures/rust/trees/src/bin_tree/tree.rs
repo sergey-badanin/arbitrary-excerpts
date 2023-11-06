@@ -4,43 +4,44 @@ pub mod tree {
     #[derive(Debug, Clone)]
     pub struct Node {
         val: i32,
-        // left: Option<NodeRef>,
-        // right: Option<NodeRef>,
+        left: Option<NodeRef>,
+        right: Option<NodeRef>,
     }
 
     impl Node {
         pub fn new(val: i32) -> Self {
             Node {
                 val: val,
-                // left: Option::None,
-                // right: Option::None,
+                left: Option::None,
+                right: Option::None,
             }
         }
     }
 
     type NodeRef = Rc<RefCell<Node>>;
 
-    fn build_tree_stack(tree: &String) -> Node {
+    fn build_tree_stack(tree: &String) -> NodeRef {
         let mut nodes: Vec<&str> = tree.split(' ').rev().collect();
         println!("{:?}", nodes);
         let val = nodes.pop().unwrap().parse::<i32>().unwrap();
-        let root = Node::new(val);
+        let root = Rc::new(RefCell::new(Node::new(val)));
 
-        let mut nodes_stack = vec![(root, false, false)];
+        let mut nodes_stack = vec![(Rc::clone(&root), false, false)];
         while !nodes_stack.is_empty() {
-            let (val, left_visited, right_visited) = nodes_stack.pop().unwrap();
+            let (val_ref, left_visited, right_visited) = nodes_stack.pop().unwrap();
 
             if !left_visited {
                 let next_node = nodes.pop();
                 if let Some(next_val) = next_node {
                     if next_val == "x" {
-                        println!("For node: {:?} left child is set: {:?}", val.val, next_val);
-                        nodes_stack.push((val, true, false));
+                        println!("For node: {:?} left child is set: {:?}", val_ref.borrow().val, next_val);
+                        val_ref.borrow_mut().left = None; 
+                        nodes_stack.push((val_ref, true, false));
                         continue;
                     }
                     let next_val = next_val.parse::<i32>().unwrap();
-                    nodes_stack.push((val, true, false));
-                    nodes_stack.push((Node::new(next_val), false, false));
+                    nodes_stack.push((val_ref, true, false));
+                    nodes_stack.push((Rc::new(RefCell::new(Node::new(next_val))), false, false));
                     continue;
                 }
             }
@@ -49,13 +50,14 @@ pub mod tree {
                 let next_node = nodes.pop();
                 if let Some(next_val) = next_node {
                     if next_val == "x" {
-                        println!("For node: {:?} right child is set: {:?}", val.val, next_val);
-                        nodes_stack.push((val, true, true));
+                        println!("For node: {:?} right child is set: {:?}", val_ref.borrow().val, next_val);
+                        val_ref.borrow_mut().right = None; 
+                        nodes_stack.push((val_ref, true, true));
                         continue;
                     }
                     let next_val = next_val.parse::<i32>().unwrap();
-                    nodes_stack.push((val, true, true));
-                    nodes_stack.push((Node::new(next_val), false, false));
+                    nodes_stack.push((val_ref, true, true));
+                    nodes_stack.push((Rc::new(RefCell::new(Node::new(next_val))), false, false));
                     continue;
                 }
             }
@@ -64,24 +66,26 @@ pub mod tree {
                 let (parent, _, right_visited) = nodes_stack.pop().unwrap();
                 if !right_visited {
                     println!(
-                        "For node: {:?} left child is set: {:?}",
-                        parent.val, val.val
+                        "For parent: {:?} left child is set: {:?}",
+                        parent.borrow().val, val_ref.borrow().val
                     );
+                    parent.borrow_mut().left = Some(Rc::clone(&val_ref));
                     nodes_stack.push((parent, true, false));
                     continue;
                 }
                 println!(
-                    "For node: {:?} right child is set: {:?}",
-                    parent.val, val.val
+                    "For parent: {:?} right child is set: {:?}",
+                    parent.borrow().val, val_ref.borrow().val
                 );
+                parent.borrow_mut().right = Some(Rc::clone(&val_ref));
                 nodes_stack.push((parent, true, true));
                 continue;
             } else {
-                println!("Root node: {:?}", val.val);
+                println!("Root node: {:?}", val_ref.borrow().val);
             }
         }
 
-        Node::new(22)
+        root
     }
 
     #[cfg(test)]
