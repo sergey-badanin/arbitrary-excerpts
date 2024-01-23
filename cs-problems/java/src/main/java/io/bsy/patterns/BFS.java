@@ -30,6 +30,34 @@ public class BFS {
         }
     }
 
+    public static int countLayersWithBFS(List<List<Vertex>> graph) {
+        var queue = new LinkedList<Vertex>();
+        var visited = new HashSet<Vertex>();
+
+        var starting = getStarting(graph);
+
+        queue.addLast(starting);
+        visited.add(starting);
+
+        var layersCount = 0;
+
+        while (!queue.isEmpty()) {
+            int queueSize = queue.size();
+            for (int i = 0; i < queueSize; i++) {
+                layersCount += 1;
+                var current = queue.removeFirst();
+                var connected = getConnected(graph, current);
+                for (var neighbor : connected) {
+                    if (!visited.contains(neighbor)) {
+                        queue.addLast(neighbor);
+                        visited.add(neighbor);
+                    }
+                }
+            }
+        }
+        return layersCount;
+    }
+
     private static Set<Vertex> getConnected(List<List<Vertex>> graph, Vertex vertex) {
         return Collections.emptySet();
     }
